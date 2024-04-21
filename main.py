@@ -1,58 +1,47 @@
-# import pygame, time
-# pygame.init()
-# joysticks = []
-# clock = pygame.time.Clock()
-# keepPlaying = True
+from inputs import get_gamepad
+import time, pygame, sys, os
+from Gamepad import PSFOUR
 
-# def process_transaction(transaction,recent,event):
-#     transaction.append(event)
-#     recent['val'] = event
-#     recent['time'] = time.time()
+#FACTORY METHOD
+def INIT_GAMEPAD(mode="PSFOUR"):
+    if mode == "PSFOUR":
+        return PSFOUR()
 
-# def fetch_button_val(event,joystick):
-#     button={'val':'','time':''}
-#     button['time']=time.time()
-#     if hasattr(event,'button'): 
-#         button['val']=event.button
-#     else:
-#         trigger_l2 = joystick.get_axis(4)  # Replace with correct index for R2
-#         trigger_r2 = joystick.get_axis(5)  # Replace with correct index for L2
+if __name__ == '__main__':
 
-#         # Check if R2 or L2 is pressed (clicked)
-#         if trigger_r2 > 0.5:
-#             button['val'] = "R2"
-#         if trigger_l2 > 0.5:
-#             button['val'] = "L2"
-#     return button
+    #init pygame and corresponding controller class
+    pygame.init()
+    gamepad = INIT_GAMEPAD() 
 
-# # for al the connected joysticks
-# for i in range(0, pygame.joystick.get_count()):
-#     # create an Joystick object in our list
-#     joysticks.append(pygame.joystick.Joystick(i))
-#     # initialize the appended joystick (-1 means last array item)
-#     joysticks[-1].init()
-#     # print a statement telling what the name of the controller is
-#     print ("Detected joystick "),joysticks[-1].get_name(),"'"
-# joystick=joysticks[-1]
-# transactions=[]
-# while keepPlaying:
-#     clock.tick(60)
+    #store needed properties
+    overlay_img = pygame.image.load(gamepad.get_bg_image())
+    display_width = overlay_img.get_width()
+    display_height = overlay_img.get_height()
+    pygame.display.set_caption('Controller Overlay')
 
-#     start_time = time.time()  # Get the current time in seconds
-#     end_time = start_time + 2  # Calculate the time when the action should stop
-    
-#     transaction=[]
-#     recent={'val':'','time':''}
-#     while time.time() < end_time: 
-#         for event in pygame.event.get():
-#             button=fetch_button_val(event,joystick)
-#             print(recent)
-#             print(button)
-#             if (recent['time']!='' and (recent['time']==button['time'] or float(button['time'])-float(recent['time']) < 0.2) and button['val'] == recent['val']) or button['val']=='': continue
-#             process_transaction(transaction,recent,button['val'])
-#             # The 0 button is the 'a' button, 1 is the 'b' button, 2 is the 'x' button, 3 is the 'y' button
-#             # register_event(joystick,event,transaction,recent_button)
+    game_display = pygame.display.set_mode((display_width, display_height))
+    button_surface = pygame.Surface((display_width, display_height), pygame.SRCALPHA)
+    clock = pygame.time.Clock()
+    game_display.fill((255,255,255,255))
 
-#     print(transaction)
-#     transactions.append(transaction);
-#     transaction=[]
+    while 1:
+        for py_event in pygame.event.get():
+            if py_event.type == pygame.QUIT:
+                closed = True
+
+        events=get_gamepad()
+        for event in events:
+            #update state of controller
+            gamepad.update(event)
+            
+            button_surface.fill((0,0,0,0))
+            game_display.blit(overlay_img, (0, 0))
+            
+            gamepad.process_state(pygame,button_surface)
+                
+            #update display and control frames
+            game_display.blit(button_surface, (0,0))
+            pygame.display.update()
+            clock.tick(60)
+
+    pygame.quit()

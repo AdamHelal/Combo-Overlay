@@ -3,7 +3,7 @@
   </a>
 
   <h2 align="center">
-    Combo Overlap
+    Combo Overlay
   </h2>
 </p>
 

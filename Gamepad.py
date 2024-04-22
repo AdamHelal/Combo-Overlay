@@ -33,6 +33,9 @@ class Gamepad(ABC):
 
 class PSFOUR(Gamepad):
 
+    #type 0: button
+    #type 1: button
+    #type 2: button
     def __init__(self):
         #initialize mapping of buttons and there needed properties
         self.mapping = {
@@ -75,7 +78,8 @@ class PSFOUR(Gamepad):
         
         pygame.draw.circle(button_surface, (255, 255, 255, 128), (circle_x, circle_y), 36)
     
-    def trigger_button(self,pygame, button_surface, button):
+    @staticmethod
+    def trigger_button(pygame, button_surface, button):
         if button['val'] and button['type']==0: pygame.draw.circle(button_surface, (0, 0, 0, 128), (button['origin_x'],button['origin_y']), button['radius'])
         elif button['val'] and button['type']==2:
             if button['val'] == -1:
@@ -89,10 +93,7 @@ class PSFOUR(Gamepad):
 
         #handle buttons and dpad
         for button in self.mapping:
-            if self.mapping[button]['type'] ==0:
-                self.trigger_button(pygame,button_surface, self.mapping[button])
-            elif self.mapping[button]['type'] == 2:
-                self.trigger_button(pygame,button_surface, self.mapping[button])
+            self.trigger_button(pygame,button_surface, self.mapping[button])
 
         self.handle_analog(pygame, button_surface, self.mapping['ABS_X'], self.mapping['ABS_Y'])
         self.handle_analog(pygame, button_surface, self.mapping['ABS_RX'], self.mapping['ABS_RY'])
